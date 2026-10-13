@@ -222,7 +222,6 @@
       transition: all 0.15s;
     }
     .stat-card:hover { transform: translateY(-2px); border-color: var(--accent); }
-    .stat-card::before { content: ""; position: absolute; top: 0; right: 0; left: 0; height: 3px; background-color: var(--primary); }
     .stat-label { font-size: 0.82rem; color: var(--text-muted); font-weight: 600; }
     .stat-value { font-size: 1.7rem; font-weight: 800; color: var(--text-main); }
     .stat-sub { font-size: 0.74rem; color: var(--text-muted); }
@@ -346,15 +345,15 @@
     <div class="modal-box">
       <div class="modal-title">חיבור ישיר ל-Google AI Studio (Gemini API)</div>
       <p class="modal-desc">
-        הזן את מפתח ה-API שלך מ-Google AI Studio. המפתח נשמר בדפדפן שלך בלבד (localStorage), ומאפשר לסרוק כל אתר חי ברשת באמצעות מודל Gemini 1.5 עם חיפוש חי (Search Grounding) ומיפוי אוטומטי!
+        הזן את מפתח ה-API שלך מ-Google AI Studio. המפתח נשמר בדפדפן שלך בלבד (localStorage), ומאפשר לסרוק כל אתר חי ברשת באמצעות מודל Gemini עם סיווג ומיפוי אוטומטי!
         <br><br>
-        אין לך עדיין מפתח? ניתן להפיק מפתח בחינם ב-30 שניות כאן:
+        הפקת מפתח בחינם:
         <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">Google AI Studio API Keys</a>
       </p>
 
       <div style="display: flex; flex-direction: column; gap: 6px;">
         <label style="font-size: 0.85rem; font-weight: 700;">Google AI Studio API Key:</label>
-        <input type="password" id="modalApiKeyInput" class="input-text" placeholder="AIzaSy...">
+        <input type="password" id="modalApiKeyInput" class="input-text" placeholder="הדבק מפתח כאן...">
       </div>
 
       <div class="modal-actions">
@@ -379,7 +378,6 @@
 
       <div class="header-actions">
         <button class="btn btn-api" onclick="openApiModal()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
           <span id="apiKeyBtnText">הגדרת API Key</span>
         </button>
         <button class="btn btn-excel" onclick="exportToExcel()">
@@ -410,15 +408,17 @@
 
         <select id="portalPreset" class="select-dropdown" onchange="applyPreset()">
           <option value="food">שירות המזון הארצי (51 עמודים - מוכן)</option>
-          <option value="health">משרד הבריאות - ראשי (govil-landing-page)</option>
+          <option value="cosmetics">מחלקת תמרוקים (govil-landing-page)</option>
+          <option value="health">משרד הבריאות - ראשי</option>
           <option value="economy">משרד הכלכלה והתעשייה</option>
           <option value="tax">רשות המסים בישראל</option>
           <option value="custom">כתובת אישית חדשה...</option>
         </select>
 
         <select id="modelChoice" class="select-dropdown">
-   <option value="gemini-2.5-flash">Gemini 2.5 Flash (מהיר)</option>
-<option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+          <option value="gemini-2.5-flash">Gemini 2.5 Flash (מהיר ומומלץ)</option>
+          <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+          <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
         </select>
 
         <button class="btn btn-primary" onclick="runMappingEngine()">
@@ -428,7 +428,7 @@
 
       <div class="api-status-banner" id="apiBanner">
         <span>🔑 <strong>חיבור ישיר ל-AI Studio:</strong> <span id="bannerKeyStatus">לא הוגדר מפתח (פועל במצב הדגמה מקומי).</span></span>
-        <button class="btn btn-outline" style="color: #7C3AED; border-color: #D8B4FE; padding: 4px 10px; font-size: 0.8rem;" onclick="openApiModal()">חבר מפתח אישי</button>
+        <button class="btn btn-outline" style="color: #7C3AED; border-color: #D8B4FE; padding: 4px 10px; font-size: 0.8rem;" onclick="openApiModal()">הגדרות מפתח</button>
       </div>
 
       <div class="scan-progress-bar" id="progressBar">
@@ -444,44 +444,8 @@
       <div class="legend-row" id="distributionLegend"></div>
     </section>
 
-    <!-- Stats Grid -->
-    <section class="stats-grid" id="statsGrid">
-      <div class="stat-card" onclick="filterByAudience('')">
-        <div class="stat-label">סה"כ פריטים שמופו</div>
-        <div class="stat-value" id="statTotal">51</div>
-        <div class="stat-sub">כלל השירותים והדפים</div>
-      </div>
-      <div class="stat-card" onclick="filterByAudience('יבואני מזון ומפיצים')">
-        <div class="stat-label">יבואני מזון ומפיצים</div>
-        <div class="stat-value" id="statImporters">14</div>
-        <div class="stat-sub">רישום, היתרים, שחרור בנמל</div>
-      </div>
-      <div class="stat-card" onclick="filterByAudience('יצרני מזון ותעשייה מקומית')">
-        <div class="stat-label">יצרנים ותעשייה מקומית</div>
-        <div class="stat-value" id="statManufacturers">10</div>
-        <div class="stat-sub">רישיון יצרן, GMP, HACCP</div>
-      </div>
-      <div class="stat-card" onclick="filterByAudience('עוסקים במזון, משווקים וקמעונאים')">
-        <div class="stat-label">משווקים וקמעונאים</div>
-        <div class="stat-value" id="statRetailers">9</div>
-        <div class="stat-sub">סימון, אלרגנים, עיצומים</div>
-      </div>
-      <div class="stat-card" onclick="filterByAudience('פודטק, מפתחי מוצרים ו-R&D')">
-        <div class="stat-label">פודטק ו-R&D</div>
-        <div class="stat-value" id="statFoodtech">7</div>
-        <div class="stat-sub">Novel Food, תוספים, FIA</div>
-      </div>
-      <div class="stat-card" onclick="filterByAudience('הציבור הרחב והצרכנים')">
-        <div class="stat-label">צרכנים והציבור</div>
-        <div class="stat-value" id="statPublic">5</div>
-        <div class="stat-sub">תלונות, ריקול, יבוא אישי</div>
-      </div>
-      <div class="stat-card" onclick="filterByAudience('גורמי מקצוע ורגולציה')">
-        <div class="stat-label">גורמי מקצוע ורגולציה</div>
-        <div class="stat-value" id="statProfs">5</div>
-        <div class="stat-sub">חקיקה, נהלים, דירקטיבות</div>
-      </div>
-    </section>
+    <!-- Dynamic Stats Grid -->
+    <section class="stats-grid" id="statsGrid"></section>
 
     <!-- Filters Section -->
     <section class="filter-section">
@@ -520,7 +484,7 @@
     <!-- Results Section -->
     <section>
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-        <div style="font-weight: 700;" id="resultsCount">מציג 51 פריטים</div>
+        <div style="font-weight: 700;" id="resultsCount">טוען נתונים...</div>
       </div>
 
       <div class="cards-grid" id="cardsContainer"></div>
@@ -1062,6 +1026,7 @@
     let selectedAudience = "";
     let viewMode = "cards";
 
+    const defaultColors = ["#0284C7", "#0D9488", "#EA580C", "#8B5CF6", "#16A34A", "#D97706", "#475569", "#E11D48", "#4F46E5"];
     const audienceColors = {
       "יבואני מזון ומפיצים": "#0284C7",
       "יצרני מזון ותעשייה מקומית": "#0D9488",
@@ -1069,8 +1034,16 @@
       "פודטק, מפתחי מוצרים ו-R&D": "#8B5CF6",
       "הציבור הרחב והצרכנים": "#16A34A",
       "עמותות וארגוני חלוקת מזון": "#D97706",
-      "גורמי מקצוע ורגולציה": "#475569"
+      "גורמי מקצוע ורגולציה": "#475569",
+      "יבואנים": "#0284C7",
+      "יצרנים": "#0D9488",
+      "צרכנים": "#16A34A",
+      "גורמי מקצוע": "#475569"
     };
+
+    function getAudienceColor(aud, idx) {
+      return audienceColors[aud] || defaultColors[idx % defaultColors.length];
+    }
 
     function init() {
       checkSavedApiKey();
@@ -1086,7 +1059,6 @@
       setTimeout(() => t.classList.remove("show"), 2600);
     }
 
-    // API Key Management
     function openApiModal() {
       document.getElementById("apiModal").classList.add("open");
       const key = localStorage.getItem("GEMINI_API_KEY") || "";
@@ -1191,42 +1163,48 @@
     function renderResults(items) {
       document.getElementById("resultsCount").innerText = `מציג ${items.length} מתוך ${currentItems.length} פריטים`;
 
-      const cardsHtml = items.map(item => `
-        <div class="card-item">
-          <div>
-            <div class="card-top">
-              <span class="tag-audience" style="color: ${audienceColors[item.audience] || '#1F4E79'}; border: 1px solid ${audienceColors[item.audience] || '#1F4E79'}40; background-color: ${audienceColors[item.audience] || '#1F4E79'}15;">
-                ${item.audience}
-              </span>
-              <span class="tag-type">${item.type}</span>
+      const cardsHtml = items.map((item, idx) => {
+        const col = getAudienceColor(item.audience, idx);
+        return `
+          <div class="card-item">
+            <div>
+              <div class="card-top">
+                <span class="tag-audience" style="color: ${col}; border: 1px solid ${col}40; background-color: ${col}15;">
+                  ${item.audience}
+                </span>
+                <span class="tag-type">${item.type}</span>
+              </div>
+              <h3 class="card-title">${item.title}</h3>
+              <div class="card-domain">${item.domain}</div>
+              <p class="card-desc">${item.desc}</p>
             </div>
-            <h3 class="card-title">${item.title}</h3>
-            <div class="card-domain">${item.domain}</div>
-            <p class="card-desc">${item.desc}</p>
+            <div class="card-footer">
+              <span style="font-size: 0.76rem; color: #64748B;">${item.secondary ? 'משני: ' + item.secondary : ''}</span>
+              <a href="${item.url}" target="_blank" rel="noopener" class="card-link">
+                מעבר לעמוד ←
+              </a>
+            </div>
           </div>
-          <div class="card-footer">
-            <span style="font-size: 0.76rem; color: #64748B;">${item.secondary ? 'משני: ' + item.secondary : ''}</span>
-            <a href="${item.url}" target="_blank" rel="noopener" class="card-link">
-              מעבר לעמוד ←
-            </a>
-          </div>
-        </div>
-      `).join("");
+        `;
+      }).join("");
       document.getElementById("cardsContainer").innerHTML = cardsHtml;
 
-      const tableHtml = items.map(item => `
-        <tr>
-          <td><strong style="color: ${audienceColors[item.audience] || '#1F4E79'}">${item.audience}</strong></td>
-          <td>${item.domain}</td>
-          <td><strong>${item.title}</strong></td>
-          <td><span class="tag-type">${item.type}</span></td>
-          <td style="max-width: 360px;">${item.desc}</td>
-          <td style="text-align: center;">
-            <a href="${item.url}" target="_blank" rel="noopener" class="card-link">פתח דף</a>
-          </td>
-          <td style="font-size: 0.8rem; color: #64748B;">${item.secondary || '-'}</td>
-        </tr>
-      `).join("");
+      const tableHtml = items.map((item, idx) => {
+        const col = getAudienceColor(item.audience, idx);
+        return `
+          <tr>
+            <td><strong style="color: ${col}">${item.audience}</strong></td>
+            <td>${item.domain}</td>
+            <td><strong>${item.title}</strong></td>
+            <td><span class="tag-type">${item.type}</span></td>
+            <td style="max-width: 360px;">${item.desc}</td>
+            <td style="text-align: center;">
+              <a href="${item.url}" target="_blank" rel="noopener" class="card-link">פתח דף</a>
+            </td>
+            <td style="font-size: 0.8rem; color: #64748B;">${item.secondary || '-'}</td>
+          </tr>
+        `;
+      }).join("");
       document.getElementById("tableBody").innerHTML = tableHtml;
     }
 
@@ -1239,10 +1217,11 @@
       const total = currentItems.length || 1;
       let barHtml = "";
       let legendHtml = "";
+      let idx = 0;
 
       for (const [aud, count] of Object.entries(counts)) {
         const pct = ((count / total) * 100).toFixed(1);
-        const col = audienceColors[aud] || "#64748B";
+        const col = getAudienceColor(aud, idx++);
 
         barHtml += `<div class="progress-segment" style="width: ${pct}%; background-color: ${col};" title="${aud}: ${count} (${pct}%)"></div>`;
         legendHtml += `
@@ -1256,13 +1235,28 @@
       document.getElementById("distributionBar").innerHTML = barHtml;
       document.getElementById("distributionLegend").innerHTML = legendHtml;
 
-      document.getElementById("statTotal").innerText = currentItems.length;
-      document.getElementById("statImporters").innerText = counts["יבואני מזון ומפיצים"] || 0;
-      document.getElementById("statManufacturers").innerText = counts["יצרני מזון ותעשייה מקומית"] || 0;
-      document.getElementById("statRetailers").innerText = counts["עוסקים במזון, משווקים וקמעונאים"] || 0;
-      document.getElementById("statFoodtech").innerText = counts["פודטק, מפתחי מוצרים ו-R&D"] || 0;
-      document.getElementById("statPublic").innerText = counts["הציבור הרחב והצרכנים"] || 0;
-      document.getElementById("statProfs").innerText = counts["גורמי מקצוע ורגולציה"] || 0;
+      // Fully Dynamic Stats Cards
+      let statsHtml = `
+        <div class="stat-card" style="border-top: 4px solid var(--primary);" onclick="filterByAudience('')">
+          <div class="stat-label">סה"כ פריטים שמופו</div>
+          <div class="stat-value">${currentItems.length}</div>
+          <div class="stat-sub">כלל השירותים והדפים</div>
+        </div>
+      `;
+
+      idx = 0;
+      for (const [aud, count] of Object.entries(counts)) {
+        const col = getAudienceColor(aud, idx++);
+        const pct = ((count / total) * 100).toFixed(0);
+        statsHtml += `
+          <div class="stat-card" style="border-top: 4px solid ${col};" onclick="filterByAudience('${aud}')">
+            <div class="stat-label">${aud}</div>
+            <div class="stat-value">${count}</div>
+            <div class="stat-sub">${pct}% מסך הפריטים</div>
+          </div>
+        `;
+      }
+      document.getElementById("statsGrid").innerHTML = statsHtml;
     }
 
     function exportToExcel() {
@@ -1293,9 +1287,12 @@
       if (preset === "food") {
         urlInput.value = "https://www.gov.il/he/departments/units/food_control_unit/govil-landing-page";
         currentItems = [...initialItems];
+        selectedAudience = "";
         updatePills();
         updateDistributionBar();
         applyFilters();
+      } else if (preset === "cosmetics") {
+        urlInput.value = "https://www.gov.il/he/departments/units/cosmetics-unit/govil-landing-page";
       } else if (preset === "health") {
         urlInput.value = "https://www.gov.il/he/departments/ministry_of_health/govil-landing-page";
       } else if (preset === "economy") {
@@ -1308,11 +1305,11 @@
       }
     }
 
-    // Real API Call or Simulation
+    // Real API Call with Model Fallback
     async function runMappingEngine() {
       const url = document.getElementById("portalUrl").value.trim();
       const apiKey = localStorage.getItem("GEMINI_API_KEY");
-      const model = document.getElementById("modelChoice").value;
+      const chosenModel = document.getElementById("modelChoice").value;
 
       if (!url) {
         alert("נא להזין כתובת URL למיפוי");
@@ -1328,8 +1325,7 @@
       pFill.style.width = "20%";
 
       if (!apiKey) {
-        // Fallback simulation mode if no API key set
-        sText.innerText = "פועל במצב הדגמה (לסריקת AI חיה - הגדר API Key מ-Google AI Studio)...";
+        sText.innerText = "פועל במצב הדגמה (לסריקת AI חיה - לחץ על 'הגדרת API Key')...";
         let pct = 20;
         const interval = setInterval(() => {
           pct += 25;
@@ -1339,22 +1335,24 @@
             setTimeout(() => {
               pBar.style.display = "none";
               sText.style.display = "none";
-              showToast("המיפוי הושלם (מצב הדגמה). לחבר AI חי לחץ על 'הגדרת API Key'.");
+              showToast("סריקת הדגמה הושלמה.");
             }, 400);
           }
-        }, 350);
+        }, 300);
         return;
       }
 
-      // Real Gemini API Call via Google AI Studio
-      try {
-        sText.innerText = "מתחבר ל-Gemini API ב-Google AI Studio וסורק תוכן חי...";
-        pFill.style.width = "40%";
+      // Models to try in order
+      const modelsToTry = [chosenModel, "gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"];
+      const uniqueModels = [...new Set(modelsToTry)];
 
-        const promptText = `סרוק את כתובת האתר הבאה: ${url}.
+      sText.innerText = "מתחבר ל-Google AI Studio וסורק עמוד חי...";
+      pFill.style.width = "40%";
+
+      const promptText = `סרוק את כתובת האתר הבאה: ${url}.
 חלץ את כל השירותים, המדריכים והדפים המרכזיים שמופיעים באתר.
 עבור כל פריט סווג:
-- audience (קהל יעד ראשי: יבואנים, יצרנים, משווקים, פודטק/מו"פ, צרכנים, עמותות, גורמי מקצוע)
+- audience (קהל יעד ראשי: למשל יבואנים, יצרנים, משווקים, פודטק/מו"פ, צרכנים, עמותות, גורמי מקצוע)
 - domain (נושא / תחום)
 - title (שם הפריט / השירות)
 - type (שירות מקוון, מדריך מקצועי, דף מידע ורגולציה, מאגר נתונים, הודעות וחירום)
@@ -1362,71 +1360,78 @@
 - url (קישור מלא לעמוד באתר)
 - secondary (קהלי יעד משניים)
 
-החזר JSON בלבד במבנה של מערך אובייקטים items.`;
+החזר אך ורק אובייקט JSON תקין עם מערך בשם items.`;
 
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+      let lastError = null;
+      let successData = null;
 
-        const requestBody = {
-          contents: [{ parts: [{ text: promptText }] }],
-          generationConfig: {
-            responseMimeType: "application/json"
+      for (const model of uniqueModels) {
+        try {
+          sText.innerText = `מנתח אתר באמצעות ${model} ב-AI Studio...`;
+          const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
+          const response = await fetch(apiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: promptText }] }],
+              generationConfig: { responseMimeType: "application/json" }
+            })
+          });
+
+          if (!response.ok) {
+            const errJson = await response.json();
+            throw new Error(errJson.error?.message || `HTTP ${response.status}`);
           }
-        };
 
-        pFill.style.width = "65%";
-        sText.innerText = "מעבד נתונים ומסווג לפי קהלי יעד ב-Gemini...";
-
-        const response = await fetch(apiUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(requestBody)
-        });
-
-        if (!response.ok) {
-          const errData = await response.json();
-          throw new Error(errData.error?.message || "שגיאה בפנייה ל-API");
-        }
-
-        const data = await response.json();
-        pFill.style.width = "90%";
-        sText.innerText = "מרענן תוצאות בדשבורד...";
-
-        const textOutput = data.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (textOutput) {
-          const parsed = JSON.parse(textOutput);
-          const newItems = Array.isArray(parsed) ? parsed : (parsed.items || []);
-          if (newItems.length > 0) {
-            currentItems = newItems.map((item, i) => ({
-              id: i + 1,
-              audience: item.audience || "כללי",
-              domain: item.domain || "מידע כללי",
-              title: item.title || "ללא כותרת",
-              type: item.type || "דף מידע",
-              desc: item.desc || "",
-              url: item.url || url,
-              secondary: item.secondary || ""
-            }));
-            showToast(`סריקת AI הצליחה! נטענו ${currentItems.length} פריטים חדשים מ-${url}`);
-          } else {
-            showToast("הסריקה הושלמה אך לא אותרו פריטים מתאימים.");
+          const data = await response.json();
+          const textOutput = data.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (textOutput) {
+            successData = JSON.parse(textOutput);
+            break; // Success!
           }
+        } catch (e) {
+          console.warn(`Model ${model} failed:`, e);
+          lastError = e;
         }
+      }
 
-        pFill.style.width = "100%";
-        setTimeout(() => {
-          pBar.style.display = "none";
-          sText.style.display = "none";
-          updatePills();
-          updateDistributionBar();
-          applyFilters();
-        }, 400);
-
-      } catch (err) {
-        console.error(err);
+      if (!successData) {
         pBar.style.display = "none";
         sText.style.display = "none";
-        alert(`שגיאה בהפעלת Gemini API: ${err.message}`);
+        alert(`שגיאה בהפעלת Gemini API: ${lastError ? lastError.message : "השרת לא החזיר תוצאות"}`);
+        return;
       }
+
+      pFill.style.width = "90%";
+      sText.innerText = "מרענן כרטיסים, פילוחים ודוחות...";
+
+      const newItems = Array.isArray(successData) ? successData : (successData.items || []);
+      if (newItems.length > 0) {
+        currentItems = newItems.map((item, i) => ({
+          id: i + 1,
+          audience: item.audience || "כללי",
+          domain: item.domain || "מידע כללי",
+          title: item.title || "ללא כותרת",
+          type: item.type || "דף מידע",
+          desc: item.desc || "",
+          url: item.url || url,
+          secondary: item.secondary || ""
+        }));
+        selectedAudience = "";
+        showToast(`סריקת AI הצליחה! נטענו ${currentItems.length} פריטים חדשים`);
+      } else {
+        showToast("הסריקה הושלמה אך לא אותרו פריטים מתאימים.");
+      }
+
+      pFill.style.width = "100%";
+      setTimeout(() => {
+        pBar.style.display = "none";
+        sText.style.display = "none";
+        updatePills();
+        updateDistributionBar();
+        applyFilters();
+      }, 350);
     }
 
     window.addEventListener("DOMContentLoaded", init);
