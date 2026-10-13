@@ -1,0 +1,1435 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>דשבורד מיפוי פורטלים - מחובר ל-Google AI Studio</title>
+  <style>
+    :root {
+      --primary: #1F4E79;
+      --primary-dark: #15395B;
+      --teal: #0D9488;
+      --accent: #2563EB;
+      --bg: #F8FAFC;
+      --surface: #FFFFFF;
+      --text-main: #0F172A;
+      --text-muted: #64748B;
+      --border: #E2E8F0;
+      --radius: 12px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.08);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      direction: rtl;
+      line-height: 1.5;
+      padding-bottom: 60px;
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 60%, #176B87 100%);
+      color: #FFFFFF;
+      padding: 24px 20px;
+      box-shadow: var(--shadow-md);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .header-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .logo-area { display: flex; align-items: center; gap: 12px; }
+    .badge-portal {
+      background: rgba(255, 255, 255, 0.18);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    h1 { font-size: 1.6rem; font-weight: 800; }
+    p.subtitle { color: #CBD5E1; font-size: 0.9rem; }
+
+    .header-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: none;
+      text-decoration: none;
+    }
+    .btn-primary { background-color: var(--teal); color: #FFFFFF; }
+    .btn-primary:hover { background-color: #0F766E; }
+    .btn-api { background-color: #7C3AED; color: #FFFFFF; }
+    .btn-api:hover { background-color: #6D28D9; }
+    .btn-outline { background-color: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.3); color: #FFFFFF; }
+    .btn-outline:hover { background-color: rgba(255,255,255,0.22); }
+    .btn-excel { background-color: #107C41; color: #FFFFFF; }
+    .btn-excel:hover { background-color: #0B5B30; }
+
+    main {
+      max-width: 1400px;
+      margin: 24px auto 0;
+      padding: 0 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    .scanner-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      box-shadow: var(--shadow-sm);
+    }
+    .scanner-card h2 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .scanner-desc { color: var(--text-muted); font-size: 0.88rem; margin-bottom: 14px; }
+
+    .scanner-controls {
+      display: grid;
+      grid-template-columns: 1fr auto auto auto;
+      gap: 10px;
+      align-items: center;
+    }
+    @media (max-width: 900px) {
+      .scanner-controls { grid-template-columns: 1fr; }
+    }
+
+    .input-text {
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.92rem;
+      outline: none;
+      width: 100%;
+    }
+    .input-text:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+    }
+    .select-dropdown {
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      background-color: var(--surface);
+      cursor: pointer;
+    }
+
+    /* API Key Banner */
+    .api-status-banner {
+      margin-top: 12px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.84rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #F3E8FF;
+      border: 1px solid #D8B4FE;
+      color: #581C87;
+    }
+    .api-status-banner a { color: #7C3AED; font-weight: 700; text-decoration: underline; }
+
+    /* Progress bar */
+    .scan-progress-bar {
+      display: none;
+      margin-top: 14px;
+      background: #E2E8F0;
+      border-radius: 6px;
+      overflow: hidden;
+      height: 8px;
+    }
+    .scan-progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #7C3AED, var(--teal));
+      transition: width 0.3s ease;
+    }
+    .scan-status-text {
+      display: none;
+      margin-top: 8px;
+      font-size: 0.88rem;
+      color: #7C3AED;
+      font-weight: 600;
+    }
+
+    /* Distribution Bar */
+    .distribution-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 22px;
+      box-shadow: var(--shadow-sm);
+    }
+    .distribution-card h3 { font-size: 1rem; font-weight: 700; color: var(--primary); margin-bottom: 12px; }
+    .progress-stacked { display: flex; height: 16px; border-radius: 8px; overflow: hidden; margin-bottom: 10px; background: #E2E8F0; }
+    .progress-segment { height: 100%; transition: width 0.3s; }
+    .legend-row { display: flex; gap: 14px; flex-wrap: wrap; font-size: 0.8rem; }
+    .legend-item { display: flex; align-items: center; gap: 5px; }
+    .legend-color { width: 10px; height: 10px; border-radius: 2px; }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 12px;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.15s;
+    }
+    .stat-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+    .stat-card::before { content: ""; position: absolute; top: 0; right: 0; left: 0; height: 3px; background-color: var(--primary); }
+    .stat-label { font-size: 0.82rem; color: var(--text-muted); font-weight: 600; }
+    .stat-value { font-size: 1.7rem; font-weight: 800; color: var(--text-main); }
+    .stat-sub { font-size: 0.74rem; color: var(--text-muted); }
+
+    /* Filter Bar */
+    .filter-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .filter-row-top {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr auto auto;
+      gap: 10px;
+      align-items: center;
+    }
+    @media (max-width: 900px) {
+      .filter-row-top { grid-template-columns: 1fr; }
+    }
+    .audience-pills { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+    .pill {
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      background-color: #F1F5F9;
+      color: #334155;
+      border: 1px solid transparent;
+      cursor: pointer;
+    }
+    .pill:hover { background-color: #E2E8F0; }
+    .pill.active { background-color: var(--primary); color: #FFFFFF; }
+
+    .view-toggle { display: flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: #F1F5F9; }
+    .view-toggle-btn { padding: 7px 11px; background: transparent; border: none; cursor: pointer; font-size: 0.84rem; font-weight: 600; color: var(--text-muted); }
+    .view-toggle-btn.active { background: #FFFFFF; color: var(--primary); box-shadow: var(--shadow-sm); }
+
+    /* Cards Grid */
+    .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 14px; }
+    .card-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .card-item:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+    .card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; gap: 8px; }
+    .tag-audience { font-size: 0.76rem; font-weight: 700; padding: 2px 8px; border-radius: 12px; }
+    .tag-type { font-size: 0.74rem; padding: 2px 6px; border-radius: 6px; background: #F1F5F9; color: #475569; font-weight: 600; }
+    .card-title { font-size: 1.02rem; font-weight: 700; color: var(--text-main); margin-bottom: 4px; }
+    .card-domain { font-size: 0.8rem; color: var(--teal); font-weight: 600; margin-bottom: 6px; }
+    .card-desc { font-size: 0.86rem; color: #475569; margin-bottom: 12px; flex-grow: 1; }
+    .card-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 10px; margin-top: auto; }
+    .card-link { color: var(--accent); text-decoration: none; font-size: 0.84rem; font-weight: 700; }
+
+    /* Table */
+    .table-container { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow-x: auto; box-shadow: var(--shadow-sm); display: none; }
+    table { width: 100%; border-collapse: collapse; text-align: right; font-size: 0.86rem; }
+    th { background: var(--primary); color: #FFFFFF; padding: 10px 14px; font-weight: 700; white-space: nowrap; }
+    td { padding: 10px 14px; border-bottom: 1px solid var(--border); }
+    tr:nth-child(even) { background-color: #F8FAFC; }
+
+    /* Modal for API Key */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.6);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 24px;
+      max-width: 520px;
+      width: 100%;
+      box-shadow: var(--shadow-lg);
+    }
+    .modal-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 8px; color: #7C3AED; }
+    .modal-desc { font-size: 0.88rem; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
+
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1E293B;
+      color: #FFFFFF;
+      padding: 8px 20px;
+      border-radius: 20px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 200;
+      pointer-events: none;
+    }
+    #toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+
+  <div id="toast">הודעה</div>
+
+  <!-- API Key Modal -->
+  <div class="modal-overlay" id="apiModal">
+    <div class="modal-box">
+      <div class="modal-title">חיבור ישיר ל-Google AI Studio (Gemini API)</div>
+      <p class="modal-desc">
+        הזן את מפתח ה-API שלך מ-Google AI Studio. המפתח נשמר בדפדפן שלך בלבד (localStorage), ומאפשר לסרוק כל אתר חי ברשת באמצעות מודל Gemini 1.5 עם חיפוש חי (Search Grounding) ומיפוי אוטומטי!
+        <br><br>
+        אין לך עדיין מפתח? ניתן להפיק מפתח בחינם ב-30 שניות כאן:
+        <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">Google AI Studio API Keys</a>
+      </p>
+
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <label style="font-size: 0.85rem; font-weight: 700;">Google AI Studio API Key:</label>
+        <input type="password" id="modalApiKeyInput" class="input-text" placeholder="AIzaSy...">
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-outline" style="color: #475569; border-color: var(--border);" onclick="closeApiModal()">ביטול</button>
+        <button class="btn btn-api" onclick="saveApiKey()">שמור מפתח והפעל</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header>
+    <div class="header-container">
+      <div class="logo-area">
+        <div>
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
+            <h1>ממשק דשבורד למיפוי פורטלים</h1>
+            <span class="badge-portal">מחובר ל-Google AI Studio</span>
+          </div>
+          <p class="subtitle">מיפוי אוטומטי של שירותים ומדריכים לפי קהלי יעד | ייצוא לאקסל ו-JSON</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button class="btn btn-api" onclick="openApiModal()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+          <span id="apiKeyBtnText">הגדרת API Key</span>
+        </button>
+        <button class="btn btn-excel" onclick="exportToExcel()">
+          ייצוא לאקסל (CSV)
+        </button>
+        <button class="btn btn-outline" onclick="exportToJSON()">
+          ייצוא JSON
+        </button>
+        <button class="btn btn-outline" onclick="window.print()">
+          הדפסה
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- Scanner / URL Input Card -->
+    <section class="scanner-card">
+      <h2>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        מנוע סריקה ומיפוי אתר לפי קישור
+      </h2>
+      <p class="scanner-desc">הכנס כתובת URL למיפוי או בחר פורטל קיים. המערכת תסרוק את העמוד, תחלץ את השירותים ותסווג אותם אוטומטית לפי קהלי יעד.</p>
+
+      <div class="scanner-controls">
+        <input type="url" id="portalUrl" class="input-text" value="https://www.gov.il/he/departments/units/food_control_unit/govil-landing-page" placeholder="הכנס כתובת URL למיפוי...">
+
+        <select id="portalPreset" class="select-dropdown" onchange="applyPreset()">
+          <option value="food">שירות המזון הארצי (51 עמודים - מוכן)</option>
+          <option value="health">משרד הבריאות - ראשי (govil-landing-page)</option>
+          <option value="economy">משרד הכלכלה והתעשייה</option>
+          <option value="tax">רשות המסים בישראל</option>
+          <option value="custom">כתובת אישית חדשה...</option>
+        </select>
+
+        <select id="modelChoice" class="select-dropdown">
+          <option value="gemini-1.5-flash">Gemini 1.5 Flash (מהיר)</option>
+          <option value="gemini-1.5-pro">Gemini 1.5 Pro (מדויק)</option>
+        </select>
+
+        <button class="btn btn-primary" onclick="runMappingEngine()">
+          הפעל מיפוי וסיווג
+        </button>
+      </div>
+
+      <div class="api-status-banner" id="apiBanner">
+        <span>🔑 <strong>חיבור ישיר ל-AI Studio:</strong> <span id="bannerKeyStatus">לא הוגדר מפתח (פועל במצב הדגמה מקומי).</span></span>
+        <button class="btn btn-outline" style="color: #7C3AED; border-color: #D8B4FE; padding: 4px 10px; font-size: 0.8rem;" onclick="openApiModal()">חבר מפתח אישי</button>
+      </div>
+
+      <div class="scan-progress-bar" id="progressBar">
+        <div class="scan-progress-fill" id="progressFill"></div>
+      </div>
+      <div class="scan-status-text" id="statusText">מתחיל סריקה...</div>
+    </section>
+
+    <!-- Visual Distribution Bar -->
+    <section class="distribution-card">
+      <h3>התפלגות פריטים לפי קהל יעד ראשי</h3>
+      <div class="progress-stacked" id="distributionBar"></div>
+      <div class="legend-row" id="distributionLegend"></div>
+    </section>
+
+    <!-- Stats Grid -->
+    <section class="stats-grid" id="statsGrid">
+      <div class="stat-card" onclick="filterByAudience('')">
+        <div class="stat-label">סה"כ פריטים שמופו</div>
+        <div class="stat-value" id="statTotal">51</div>
+        <div class="stat-sub">כלל השירותים והדפים</div>
+      </div>
+      <div class="stat-card" onclick="filterByAudience('יבואני מזון ומפיצים')">
+        <div class="stat-label">יבואני מזון ומפיצים</div>
+        <div class="stat-value" id="statImporters">14</div>
+        <div class="stat-sub">רישום, היתרים, שחרור בנמל</div>
+      </div>
+      <div class="stat-card" onclick="filterByAudience('יצרני מזון ותעשייה מקומית')">
+        <div class="stat-label">יצרנים ותעשייה מקומית</div>
+        <div class="stat-value" id="statManufacturers">10</div>
+        <div class="stat-sub">רישיון יצרן, GMP, HACCP</div>
+      </div>
+      <div class="stat-card" onclick="filterByAudience('עוסקים במזון, משווקים וקמעונאים')">
+        <div class="stat-label">משווקים וקמעונאים</div>
+        <div class="stat-value" id="statRetailers">9</div>
+        <div class="stat-sub">סימון, אלרגנים, עיצומים</div>
+      </div>
+      <div class="stat-card" onclick="filterByAudience('פודטק, מפתחי מוצרים ו-R&D')">
+        <div class="stat-label">פודטק ו-R&D</div>
+        <div class="stat-value" id="statFoodtech">7</div>
+        <div class="stat-sub">Novel Food, תוספים, FIA</div>
+      </div>
+      <div class="stat-card" onclick="filterByAudience('הציבור הרחב והצרכנים')">
+        <div class="stat-label">צרכנים והציבור</div>
+        <div class="stat-value" id="statPublic">5</div>
+        <div class="stat-sub">תלונות, ריקול, יבוא אישי</div>
+      </div>
+      <div class="stat-card" onclick="filterByAudience('גורמי מקצוע ורגולציה')">
+        <div class="stat-label">גורמי מקצוע ורגולציה</div>
+        <div class="stat-value" id="statProfs">5</div>
+        <div class="stat-sub">חקיקה, נהלים, דירקטיבות</div>
+      </div>
+    </section>
+
+    <!-- Filters Section -->
+    <section class="filter-section">
+      <div class="filter-row-top">
+        <input type="text" id="searchInput" class="input-text" placeholder="חיפוש חופשי (כותרת, נושא, מילות מפתח, קהל יעד)..." oninput="applyFilters()">
+        
+        <select id="typeFilter" class="select-dropdown" onchange="applyFilters()">
+          <option value="">כל סוגי הפריטים</option>
+          <option value="שירות מקוון">שירות מקוון</option>
+          <option value="מדריך מקצועי">מדריך מקצועי</option>
+          <option value="דף מידע ורגולציה">דף מידע ורגולציה</option>
+          <option value="מאגר נתונים">מאגר נתונים</option>
+          <option value="הודעות וחירום">הודעות וחירום</option>
+        </select>
+
+        <select id="sortSelect" class="select-dropdown" onchange="applyFilters()">
+          <option value="id-asc">סדר הופעה באתר</option>
+          <option value="title-asc">כותרת (א-ת)</option>
+          <option value="audience-asc">קהל יעד</option>
+          <option value="type-asc">סוג פריט</option>
+        </select>
+
+        <div class="view-toggle">
+          <button class="view-toggle-btn active" id="btnCardsView" onclick="setViewMode('cards')">כרטיסים</button>
+          <button class="view-toggle-btn" id="btnTableView" onclick="setViewMode('table')">טבלה</button>
+        </div>
+
+        <button class="btn btn-outline" style="color: #475569; border-color: var(--border);" onclick="resetFilters()">
+          איפוס
+        </button>
+      </div>
+
+      <div class="audience-pills" id="audiencePills"></div>
+    </section>
+
+    <!-- Results Section -->
+    <section>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <div style="font-weight: 700;" id="resultsCount">מציג 51 פריטים</div>
+      </div>
+
+      <div class="cards-grid" id="cardsContainer"></div>
+
+      <div class="table-container" id="tableContainer">
+        <table>
+          <thead>
+            <tr>
+              <th>קהל יעד</th>
+              <th>תחום / נושא</th>
+              <th>שם הדף / השירות / המדריך</th>
+              <th>סוג פריט</th>
+              <th>תיאור תמציתי ומטרה</th>
+              <th style="text-align: center;">קישור ישיר</th>
+              <th>קהלים משניים</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    const initialItems = [
+  {
+    "id": 1,
+    "audience": "יבואני מזון ומפיצים",
+    "domain": "יבוא מזון שאינו מהחי",
+    "title": "בקשת רישום יבואן חדש (מזון שאינו מהחי)",
+    "type": "שירות מקוון",
+    "desc": "הגשת בקשה לקבלת תעודת רישום יבואן מזון שאינו מן החי – תנאי סף מקדמי והכרחי ליבוא מזון לישראל.",
+    "url": "https://www.gov.il/he/service/non-animal-derived-food-importer-registration",
+    "secondary": "עמילי מכס, יועצי רגולציה"
+  },
+  {
+    "id": 2,
+    "audience": "יבואני מזון ומפיצים",
+    "domain": "יבוא מזון מן החי",
+    "title": "בקשת רישום יבואן (מזון מן החי)",
+    "type": "שירות מקוון",
+    "desc": "הגשת בקשה לקבלת תעודת רישום יבואן לבשר, דגים ומוצריהם מן החי.",
+    "url": "https://www.gov.il/he/service/animal-derived-food-importer-registration",
+    "secondary": "עמילי מכס, וטרינרים"
+  },
+  {
+    "id": 3,
+    "audience": "יבואני מזון ומפיצים",
+    "domain": "יבוא מזון שאינו מהחי",
+    "title": "הארכת תעודת רישום יבואן (מזון שאינו מן החי)",
+    "type": "שירות מקוון",
+    "desc": "הגשת בקשה להארכת תוקף תעודת רישום יבואן קיימת טרם פקיעתה.",
+    "url": "https://www.gov.il/he/service/food-importer-registration-extension",
+    "secondary": "עמילי מכס"
+  },
+  {
+    "id": 4,
+    "audience": "יבואני מזון ומפיצים",
+    "domain": "יבוא מזון מן החי",
+    "title": "קבלת אישור ייבוא מזון מן החי",
+    "type": "שירות מקוון",
+    "desc": "קבלת אישור יבוא מקדמי לדגים, מוצרי דגים גולמיים ומעובדים ומוצרי בשר מעובדים.",
+    "url": "https://www.gov.il/he/service/animal-derived-food-product-importation",
+    "secondary": "סוכני סחר, בתי קירור"
+  },
+  {
+    "id": 5,
+    "audience": "יבואני מזון ומפיצים",
+    "domain": "יבוא מזון רגיש",
+    "title": "בקשת אישור לייבוא מוצר מזון רגיש (שאינו מהחי)",
+    "type": "שירות מקוון",
+    "desc": "הנפקת תעודת אישור מוקדם ליבוא מזון מקבוצת 'המזונות הרגישים' (מוצרי חלב, מזון תינוקות וכו').",
+    "url": "https://www.gov.il/he/service/sensitive-food-importation-permit",
+    "secondary": "סוכני סחר, משווקים"
+  },
+  {
+    "id": 6,
+    "audience": "יבואני מזון ומפיצים",
+    "domain": "יבוא מזון רגיש",
+    "title": "הארכת אישור מוקדם לייבוא מוצר מזון רגיש",
+    "type": "שירות מקוון",
+    "desc": "הארכת תוקף אישור מוקדם עבור מוצר מזון רגיש קיים המיובא לישראל.",
+    "url": "https://www.gov.il/he/service/sensitive-food-product-permit-extension",
+    "secondary": "עמילי מכס"
+  },
+  {
+    "id": 7,
+    "audience": "יבואני מזון ומפיצים",
+    "domain": "שחרור משלוחים בנמל",
+    "title": "שחרור מוצר מזון מיובא (מזון שאינו מהחי)",
+    "type": "שירות מקוון",
+    "desc": "הגשת בקשה לשחרור משלוח מזון מיובא בתחנות ההסגר והנמלים בישראל.",
+    "url": "https://www.gov.il/he/service/release-import-status-non-animal-derived-food-product",
+    "secondary": "עמילי מכס, חברות לוגיסטיקה"
+  },
+  {
+    "id": 8,
+    "audience": "יבואני מזון ומפיצים",
+    "domain": "שחרור משלוחים בנמל",
+    "title": "בקשה לטיפול במשלוח מזון מן החי מיבוא (דגים ובשר)",
+    "type": "שירות מקוון",
+    "desc": "טיפול במשלוח מזון מן החי, העברה לבית קירור וטרינרי, בדיקות מעבדה והנפקת היתר כניסה.",
+    "url": "https://www.gov.il/he/service/processing-imported-animal-derived-food-products",
+    "secondary": "בתי קירור וטרינריים, עמילי מכס"
+  },
+  {
+    "id": 9,
+    "audience": "יבואני מזון ומפיצים",
+    "domain": "מדריכי יבוא",
+    "title": "תהליכי יבוא מזון מן החי - דף מידע ונהלים",
+    "type": "דף מידע ורגולציה",
+    "desc": "הסבר מפורט על שלבי היבוא, בדיקות וטרינריות, תחנות בדיקה (תבג\"ו), אגרות ותנאי שחרור.",
+    "url": "https://www.gov.il/he/pages/animal-import",
+    "secondary": "וטרינרים, מנהלי רכש"
+  },
+  {
+    "id": 10,
+    "audience": "יבואני מזון ומפיצים",
+    "domain": "מדריכי יבוא",
+    "title": "תהליכי יבוא מזון שאינו מן החי - מזון רגיל ורגיש",
+    "type": "דף מידע ורגולציה",
+    "desc": "פירוט המסלולים ליבוא מזון רגיל מול מזון רגיש, בדיקות מעבדה נדרשות והנחיות שחרור.",
+    "url": "https://www.gov.il/he/pages/non-animal-food-import",
+    "secondary": "משווקים, עמילי מכס"
+  },
+  {
+    "id": 11,
+    "audience": "יבואני מזון ומפיצים",
+    "domain": "רפורמת היבוא",
+    "title": "יבואן נאות - המסלול האירופי להקלה ברגולציה",
+    "type": "מדריך מקצועי",
+    "desc": "הנחיות ודרישות להצטרפות למסלול 'יבואן נאות' המאפשר שחרור מהיר על בסיס עמידה בתקנים אירופיים.",
+    "url": "https://www.gov.il/he/pages/proper-importer-info",
+    "secondary": "מנהלי איכות, יועצי רגולציה"
+  },
+  {
+    "id": 12,
+    "audience": "יבואני מזון ומפיצים",
+    "domain": "רפורמת היבוא",
+    "title": "רפורמת המזון המבוססת על האיחוד האירופי",
+    "type": "דף מידע ורגולציה",
+    "desc": "מידע על אימוץ הרגולציה האירופית, הסרת חסמים ביבוא מזון והרחבת אחריות היבואן.",
+    "url": "https://www.gov.il/he/pages/food-regulation-european-union",
+    "secondary": "כלל העוסקים במזון, יועצים משפטיים"
+  },
+  {
+    "id": 13,
+    "audience": "יבואני מזון ומפיצים",
+    "domain": "משקאות משכרים",
+    "title": "ייבוא משקאות משכרים (אלכוהול)",
+    "type": "דף מידע ורגולציה",
+    "desc": "מסלולי יבוא אלכוהול, דרישות בדיקת מעבדה מוסמכת, העברת סמכויות והנחיות ליבואנים.",
+    "url": "https://www.gov.il/he/pages/alcohol-imports",
+    "secondary": "יבואני אלכוהול, סיטונאים"
+  },
+  {
+    "id": 14,
+    "audience": "יבואני מזון ומפיצים",
+    "domain": "מאגרי נתונים",
+    "title": "רשימת יבואני מזון בעלי תעודות רישום יבואן",
+    "type": "מאגר נתונים",
+    "desc": "מאגר פתוח לחיפוש ובדיקת תוקף רישום יבואנים רשמיים בישראל.",
+    "url": "https://www.gov.il/he/departments/dynamiccollectors/fcs-lists",
+    "secondary": "עמילי מכס, קמעונאים, צרכנים"
+  },
+  {
+    "id": 15,
+    "audience": "יצרני מזון ותעשייה מקומית",
+    "domain": "רישוי יצרנים",
+    "title": "בקשה לקבלת רישיון חדש לייצור מזון או לחידוש רישיון קיים",
+    "type": "שירות מקוון",
+    "desc": "הגשת בקשה מקוונת לקבלת רישיון יצרן למפעל מזון חדש או חידוש תקופתי של רישיון קיים.",
+    "url": "https://www.gov.il/he/service/license-food-production",
+    "secondary": "יזמי מזון, מנהלי מפעלים"
+  },
+  {
+    "id": 16,
+    "audience": "יצרני מזון ותעשייה מקומית",
+    "domain": "איכות ותנאי ייצור",
+    "title": "בקשה לקבלת אישור ייצור נאות GMP למפעלי מזון",
+    "type": "שירות מקוון",
+    "desc": "הגשת בקשה לקבלת היתר תנאי ייצור נאותים (Good Manufacturing Practices) או חידושו.",
+    "url": "https://www.gov.il/he/service/gmp-food-production",
+    "secondary": "מנהלי אבטחת איכות, יועצי תקנים"
+  },
+  {
+    "id": 17,
+    "audience": "יצרני מזון ותעשייה מקומית",
+    "domain": "הקמת מפעל ורישוי",
+    "title": "ייצור מזון מקומי ודרכי שיווק - פורטל היצרנים",
+    "type": "מדריך מקצועי",
+    "desc": "ריכוז כלל המידע הדרוש ליזמים וליצרנים: תהליכי רישוי, תנאי תברואה, מבנה מפעל ותוכנית בטיחות.",
+    "url": "https://www.gov.il/he/pages/local-food-production-and-distribution",
+    "secondary": "יזמים, מהנדסי מזון, אדריכלים"
+  },
+  {
+    "id": 18,
+    "audience": "יצרני מזון ותעשייה מקומית",
+    "domain": "מערכות בטיחות מזון",
+    "title": "מדריך לבניית מערכת בקרת בטיחות מזון עצמית HACCP במפעלי מזון",
+    "type": "מדריך מקצועי",
+    "desc": "מדריך להקמה ויישום מערכת בקרת סיכונים עצמית במפעלי מזון, עם דגש על עסקים קטנים.",
+    "url": "https://www.gov.il/he/pages/local-food-production-and-distribution?chapterIndex=4",
+    "secondary": "עסקים קטנים, טכנולוגי מזון"
+  },
+  {
+    "id": 19,
+    "audience": "יצרני מזון ותעשייה מקומית",
+    "domain": "תעשיית הסלטים",
+    "title": "מדריך לבניית מערכת בקרת בטיחות HACCP במפעלי סלטים",
+    "type": "מדריך מקצועי",
+    "desc": "הנחיות מקצועיות מפורטות ליישום עקרונות HACCP במפעלי סלטים צמחיים וסלטים עם רכיבים מן החי.",
+    "url": "https://www.gov.il/he/pages/haccp-guide-salad-production-food-plants",
+    "secondary": "יצרני סלטים, טכנולוגי מזון"
+  },
+  {
+    "id": 20,
+    "audience": "יצרני מזון ותעשייה מקומית",
+    "domain": "ענף החלב והמחלבות",
+    "title": "מדריך HACCP עבור יצרני חלב ומחלבות - חלק ב'",
+    "type": "מדריך מקצועי",
+    "desc": "מסגרת מקצועית ליישום HACCP במחלבות לקליטת חלב גולמי, פיסטור, עיבוד וניהול נקודות בקרה קריטיות.",
+    "url": "https://www.gov.il/he/pages/haccp-p2",
+    "secondary": "רפתנים, בעלי מחלבות, מנהלי ייצור"
+  },
+  {
+    "id": 21,
+    "audience": "יצרני מזון ותעשייה מקומית",
+    "domain": "ענף החלב והמחלבות",
+    "title": "מדריך לקיום כללי היגיינה נאותים (GHP) במחלבות והנחיות גמישות למחלבות קטנות",
+    "type": "מדריך מקצועי",
+    "desc": "דרישות תברואתיות, תוכנית קדם FSMS והקלות ייעודיות מותאמות למחלבות בוטיק ומחלבות קטנות.",
+    "url": "https://www.gov.il/he/departments/units/food_control_unit/govil-landing-page",
+    "secondary": "מחלבות בוטיק, יועצי תברואה"
+  },
+  {
+    "id": 22,
+    "audience": "יצרני מזון ותעשייה מקומית",
+    "domain": "תברואה והיגיינה",
+    "title": "מדריך לקיום כללי היגיינה טובים (GHP) במפעלי מזון והכנת תוכנית קדם",
+    "type": "מדריך מקצועי",
+    "desc": "דרישות היגיינה בסיסיות, עמידה בתקנות רישוי עסקים והכנת תוכנית קדם לסקר סיכונים.",
+    "url": "https://www.gov.il/he/departments/units/food_control_unit/govil-landing-page",
+    "secondary": "מנהלי תברואה, מנהלי תחזוקה"
+  },
+  {
+    "id": 23,
+    "audience": "יצרני מזון ותעשייה מקומית",
+    "domain": "יקבים וייצור יין",
+    "title": "מפת אזורי היין של ישראל וסימון אזורי גידול",
+    "type": "דף מידע ורגולציה",
+    "desc": "חלוקת ישראל ל-8 אזורי יין ו-18 אזורי משנה לקביעת מקור גיאוגרפי של ענבים ויין וסימון תוויות רשמי.",
+    "url": "https://www.gov.il/he/collectors/news?officeId=104cb0f4-d65a-4692-b590-94af928c19c0&TopicId=b4804882-ec76-4dda-a08e-68a6d7c90fb8",
+    "secondary": "כורמים, בעלי יקבים, ייננים, צרכנים"
+  },
+  {
+    "id": 24,
+    "audience": "יצרני מזון ותעשייה מקומית",
+    "domain": "מאגרי נתונים",
+    "title": "רשימת מפעלי מזון בעלי היתר GMP ורישיון יצרן בתוקף",
+    "type": "מאגר נתונים",
+    "desc": "מרשם מקוון של יצרני מזון מורשים ומפעלים בעלי אישור ייצור נאות בישראל.",
+    "url": "https://registries.health.gov.il/FoodManufacturers/gmp/true",
+    "secondary": "קמעונאים, צרכנים, ספקים"
+  },
+  {
+    "id": 25,
+    "audience": "עוסקים במזון, משווקים וקמעונאים",
+    "domain": "סימון ותוויות",
+    "title": "תווית מזון וסימון תזונתי - מדריך מקיף לדרישות החוק",
+    "type": "מדריך מקצועי",
+    "desc": "דרישות סימון מוצרי מזון, סימון תזונתי עפ\"י תקנה 1169/2011, הצהרות בריאותיות ופרטי עוסק.",
+    "url": "https://www.gov.il/he/pages/food-labeling",
+    "secondary": "מעצבי אריזות, מנהלי שיווק, צרכנים"
+  },
+  {
+    "id": 26,
+    "audience": "עוסקים במזון, משווקים וקמעונאים",
+    "domain": "אלרגנים והגנת הצרכן",
+    "title": "סימון אלרגנים במזון - חובות יידוע והבלטה",
+    "type": "מדריך מקצועי",
+    "desc": "הנחיות להבלטה וסימון רכיבים אלרגניים בתווית המוצר להגנה על אוכלוסיות אלרגיות ומניעת סכנת חיים.",
+    "url": "https://www.gov.il/he/pages/food-labeling?chapterIndex=8&utm_source=chatgpt.com",
+    "secondary": "צרכנים אלרגיים, מסעדנים, קמעונאים"
+  },
+  {
+    "id": 27,
+    "audience": "עוסקים במזון, משווקים וקמעונאים",
+    "domain": "בדיקות מעבדה ותוויות",
+    "title": "מדריך לקביעת הסבילות ביחס לערכים תזונתיים המוצהרים על התווית",
+    "type": "מדריך מקצועי",
+    "desc": "טווחי סטייה וסבילות מוכרים בין הערכים התזונתיים המוצהרים בתווית לבין בדיקות המעבדה בפועל.",
+    "url": "https://www.gov.il/he/departments/units/food_control_unit/govil-landing-page",
+    "secondary": "מעבדות בדיקה, טכנולוגי מזון"
+  },
+  {
+    "id": 28,
+    "audience": "עוסקים במזון, משווקים וקמעונאים",
+    "domain": "סימון רכיבים",
+    "title": "מדריך ציון כמותי של רכיבים בתווית מזון (QUID)",
+    "type": "מדריך מקצועי",
+    "desc": "כללים לציון אחוזי רכיבים מודגשים או מאפיינים בתווית המזון לפי תקנה 1169.",
+    "url": "https://www.gov.il/he/departments/units/food_control_unit/govil-landing-page",
+    "secondary": "מנהלי רגולציה, יצרנים"
+  },
+  {
+    "id": 29,
+    "audience": "עוסקים במזון, משווקים וקמעונאים",
+    "domain": "אכיפה וסנקציות",
+    "title": "הגשת תגובה להודעה על כוונת חיוב - עיצום כספי על עוסקים במזון",
+    "type": "שירות מקוון",
+    "desc": "הגשת טענות, בקשת ארכה ועיון בחומר ראיות כנגד כוונת חיוב בעיצום כספי על הפרת חוק המזון.",
+    "url": "https://www.gov.il/he/service/submitting-response-to-notice",
+    "secondary": "עורכי דין, מנהלי כספים, בעלי עסקים"
+  },
+  {
+    "id": 30,
+    "audience": "עוסקים במזון, משווקים וקמעונאים",
+    "domain": "אכיפה ופיקוח",
+    "title": "אכיפה בשירות המזון הארצי ומדיניות אכיפה מנהלית",
+    "type": "דף מידע ורגולציה",
+    "desc": "עקרונות האכיפה המנהלית, בדיקות ביקורת בשווקים, צווים וסנקציות כלפי עוסקים במזון.",
+    "url": "https://www.gov.il/he/pages/enforcement-food",
+    "secondary": "יועצים משפטיים, רשתות שיווק"
+  },
+  {
+    "id": 31,
+    "audience": "עוסקים במזון, משווקים וקמעונאים",
+    "domain": "אריזות וציוד",
+    "title": "חומרים וציוד הבאים במגע עם מזון - תקינה ובטיחות",
+    "type": "דף מידע ורגולציה",
+    "desc": "דרישות בטיחות, הגירת חומרים וסבילות כלי פלסטיק, אריזות וציוד תעשייתי הבא במגע ישיר עם מזון.",
+    "url": "https://www.gov.il/he/departments/units/food_control_unit/govil-landing-page",
+    "secondary": "יצרני אריזות, קייטרינג, מסעדות"
+  },
+  {
+    "id": 32,
+    "audience": "עוסקים במזון, משווקים וקמעונאים",
+    "domain": "בטיחות וטוקסיקולוגיה",
+    "title": "מזהמים במזון וחומרי הדברה - רגולציה ותקנים",
+    "type": "דף מידע ורגולציה",
+    "desc": "תקני שאריות חומרי הדברה, מתכות כבדות, מיקוטוקסינים ודיאוקסינים במוצרי מזון בשיווק.",
+    "url": "https://www.gov.il/he/pages/contaminants",
+    "secondary": "חקלאים, מעבדות, מנהלי רכש"
+  },
+  {
+    "id": 33,
+    "audience": "עוסקים במזון, משווקים וקמעונאים",
+    "domain": "סחר ומעברי גבול",
+    "title": "בקשת רישום במרשם המשווקים המורשים בהבאת מזון מהרשות הפלסטינית",
+    "type": "שירות מקוון",
+    "desc": "רישום וחידוש רישום משווקים מורשים להעברת תוצרת ומזון משטחי הרשות הפלסטינית לישראל.",
+    "url": "https://www.gov.il/he/departments/units/food_control_unit/govil-landing-page",
+    "secondary": "סיטונאים, נהגי תובלה, סוחרי פירות וירקות"
+  },
+  {
+    "id": 34,
+    "audience": "פודטק, מפתחי מוצרים ו-R&D",
+    "domain": "מזון חדש",
+    "title": "בקשת רישום מזון חדש (Novel Food)",
+    "type": "שירות מקוון",
+    "desc": "הגשת תיק הערכת בטיחות לרכיב מזון חדש, טכנולוגיית ייצור חדשנית או מזון שלא נצרך בישראל לפני 2006.",
+    "url": "https://www.gov.il/he/service/electronic-submission-form-novel-food",
+    "secondary": "חברות סטארטאפ, חוקרים באקדמיה"
+  },
+  {
+    "id": 35,
+    "audience": "פודטק, מפתחי מוצרים ו-R&D",
+    "domain": "מזון חדש",
+    "title": "מזון חדש בישראל - מדריך והנחיות הגשה",
+    "type": "מדריך מקצועי",
+    "desc": "הנחיות הגשה לוועדה המייעצת למזון חדש, מתודולוגיית הערכת סיכונים טוקסיקולוגיים ותנאי אישור.",
+    "url": "https://www.gov.il/he/departments/units/food_control_unit/govil-landing-page",
+    "secondary": "יועצי רגולציה לפודטק, מדענים"
+  },
+  {
+    "id": 36,
+    "audience": "פודטק, מפתחי מוצרים ו-R&D",
+    "domain": "תוספי מזון",
+    "title": "עדכון רשימת תוספי מזון - הגשת בקשה לתוסף חדש",
+    "type": "שירות מקוון",
+    "desc": "בקשה להוספת תוסף מזון חדש (Food Additive) או שינוי תנאי השימוש ומינונים ברשימה המאושרת.",
+    "url": "https://www.gov.il/he/service/new-food-additive-petition",
+    "secondary": "כימאי מזון, יצרני תוספים"
+  },
+  {
+    "id": 37,
+    "audience": "פודטק, מפתחי מוצרים ו-R&D",
+    "domain": "משפרי מזון ואנזימים",
+    "title": "היחידה לחומרים משפרי מזון (FIA - Food Improvement Agents)",
+    "type": "דף מידע ורגולציה",
+    "desc": "פעילות היחידה המפקחת על תוספי מזון, חומרי טעם וריח ואנזימי מזון, ואימוץ הדירקטיבות האירופיות.",
+    "url": "https://www.gov.il/he/pages/fia",
+    "secondary": "יצרני תמציות טעם וריח, מפתחי אנזימים"
+  },
+  {
+    "id": 38,
+    "audience": "פודטק, מפתחי מוצרים ו-R&D",
+    "domain": "צמחים ופטריות",
+    "title": "צמחי מאכל, פטריות ואצות במזון",
+    "type": "דף מידע ורגולציה",
+    "desc": "מעמד חוקי וסיווג בטיחותי של צמחים, פטריות ומיקרו-אצות לשימוש כרכיבי מזון או בתוספי תזונה.",
+    "url": "https://www.gov.il/he/pages/plants",
+    "secondary": "מפתחי תוספי תזונה, חקלאי אצות"
+  },
+  {
+    "id": 39,
+    "audience": "פודטק, מפתחי מוצרים ו-R&D",
+    "domain": "תוספי תזונה",
+    "title": "תוספי תזונה - רגולציה, קצובות מרביות והנחיות",
+    "type": "מדריך מקצועי",
+    "desc": "רגולציית ויטמינים, מינרלים, צמחי מרפא, קצובה יומית מרבית, סימון אזהרות והגשת בקשות אישור.",
+    "url": "https://www.gov.il/he/pages/food-supplements",
+    "secondary": "רוקחים, יבואני ויטמינים, משווקי תזונה"
+  },
+  {
+    "id": 40,
+    "audience": "פודטק, מפתחי מוצרים ו-R&D",
+    "domain": "הנדסה גנטית",
+    "title": "מזון מהונדס גנטית (GMO) - מדיניות ובטיחות",
+    "type": "דף מידע ורגולציה",
+    "desc": "סקירת הגישה הרגולטורית להנדסה גנטית במזון, הליכי הערכת בטיחות ודרישות סימון מוצרים.",
+    "url": "https://www.gov.il/he/pages/genetically-modified-food",
+    "secondary": "חוקרי גנטיקה, אגרונומים"
+  },
+  {
+    "id": 41,
+    "audience": "הציבור הרחב והצרכנים",
+    "domain": "פניות ותלונות",
+    "title": "פניות ותלונות הציבור על מוצרי מזון לקויים",
+    "type": "שירות מקוון",
+    "desc": "הגשת תלונה מקוונת למשרד הבריאות על פגמים, קלקול, עובש, חרקים או גופים זרים במוצרי מזון ארוזים.",
+    "url": "https://www.gov.il/he/service/petitions_and_complaints_regarding_food",
+    "secondary": "כלל אזרחי ישראל"
+  },
+  {
+    "id": 42,
+    "audience": "הציבור הרחב והצרכנים",
+    "domain": "אזהרות ובטיחות",
+    "title": "קריאות להחזרה יזומה (Recall) של מוצרי מזון מדרכי השיווק",
+    "type": "הודעות וחירום",
+    "desc": "פרסום מיידי של הודעות איסוף יזום עקב זיהומים חיידקיים (סלמונלה, ליסטריה), אלרגנים לא מסומנים או ליקויים.",
+    "url": "https://www.gov.il/he/departments/topics/food-recall",
+    "secondary": "כלל הצרכנים, הורים לפעוטות, צרכנים אלרגיים"
+  },
+  {
+    "id": 43,
+    "audience": "הציבור הרחב והצרכנים",
+    "domain": "יבוא לשימוש עצמי",
+    "title": "מדריך ליבוא אישי של מוצרי מזון ותוספי תזונה",
+    "type": "מדריך מקצועי",
+    "desc": "הנחיות לציבור על כמויות מותרות ביבוא אישי בדואר או במזוודה, מוצרים מותרים/אסורים ופטורים ממכס.",
+    "url": "https://www.gov.il/he/pages/fcs-personal-imports",
+    "secondary": "קונים אונליין, נוסעים לחו\"ל"
+  },
+  {
+    "id": 44,
+    "audience": "הציבור הרחב והצרכנים",
+    "domain": "מוכנות לחירום",
+    "title": "הנחיות בנושא מזון - מידע לשעת חירום",
+    "type": "הודעות וחירום",
+    "desc": "כללי בטיחות מזון בעתות מלחמה ומשבר, שמירה על מזון בהפסקות חשמל, צריכת מים בטוחה ואגירת מוצרים.",
+    "url": "https://www.gov.il/he/departments/units/food_control_unit/govil-landing-page",
+    "secondary": "משפחות, רשויות מקומיות, ארגוני הצלה"
+  },
+  {
+    "id": 45,
+    "audience": "הציבור הרחב והצרכנים",
+    "domain": "שקיפות ומחקר",
+    "title": "סקרי איכות ובטיחות מזון (דבש, מי שתייה, דיאוקסינים)",
+    "type": "הודעות וחירום",
+    "desc": "ממצאי סקרי בדיקת אותנטיות דבש לקראת החגים, איכות מי שתייה מבוקבקים ובדיקות מזהמים במזונות הנמכרים בישראל.",
+    "url": "https://www.gov.il/he/departments/units/food_control_unit/govil-landing-page",
+    "secondary": "עיתונאים, ארגוני צרכנים, הציבור"
+  },
+  {
+    "id": 46,
+    "audience": "עמותות וארגוני חלוקת מזון",
+    "domain": "ביטחון תזונתי והתנדבות",
+    "title": "עמותות וארגונים המחלקים מזון - הנחיות ותנאי פטור",
+    "type": "מדריך מקצועי",
+    "desc": "כללי בטיחות המזון בחלוקת חבילות ובתי תמחוי, תנאי פטור, הובלה נכונה והנחיות לשמירה על בריאות הנתמכים.",
+    "url": "https://www.gov.il/he/pages/fcs-associations",
+    "secondary": "מתנדבים, מנהלי עמותות, תורמי מזון"
+  },
+  {
+    "id": 47,
+    "audience": "גורמי מקצוע ורגולציה",
+    "domain": "חקיקה ומשפט",
+    "title": "אוגדן חקיקה בתחום המזון בישראל",
+    "type": "מאגר נתונים",
+    "desc": "ריכוז חוק הגנה על בריאות הציבור (מזון), פקודת בריאות הציבור, תקנות, צווים ותקנים ישראליים מחייבים.",
+    "url": "https://www.gov.il/he/Departments/DynamicCollectors/fcs-legistlations",
+    "secondary": "עורכי דין, יועצי איכות, מפקחים"
+  },
+  {
+    "id": 48,
+    "audience": "גורמי מקצוע ורגולציה",
+    "domain": "נהלים והנחיות",
+    "title": "חוזרים, נהלים והנחיות בנושא שירות המזון הארצי",
+    "type": "מאגר נתונים",
+    "desc": "מאגר נוהלי עבודה רשמיים, חוזרי מנהל שירות המזון והנחיות מקצועיות מחייבות למפקחים ולעסקים.",
+    "url": "https://www.gov.il/he/departments/dynamiccollectors/fcs-regulations",
+    "secondary": "מפקחי מזון, מנהלי הבטחת איכות"
+  },
+  {
+    "id": 49,
+    "audience": "גורמי מקצוע ורגולציה",
+    "domain": "אסדרה בינלאומית",
+    "title": "תרגום ההוראות המאומצות מהאיחוד האירופי",
+    "type": "דף מידע ורגולציה",
+    "desc": "תרגום רשמי לעברית של תקנות האיחוד האירופי המאומצות בחוק הישראלי (תקנות 852, 1169, 1333 ועוד).",
+    "url": "https://www.gov.il/he/pages/fia-682790724",
+    "secondary": "יועצי תקינה אירופית, יבואנים"
+  },
+  {
+    "id": 50,
+    "audience": "גורמי מקצוע ורגולציה",
+    "domain": "הדרכה והכשרה",
+    "title": "כנסים, הרצאות ומדריכים מוקלטים לעוסקים במזון",
+    "type": "מדריך מקצועי",
+    "desc": "הרצאות וימי עיון מקצועיים מוקלטים לעוסקים במזון ויועצי איכות בנושאי רפורמת המזון, יבוא, HACCP ועוד.",
+    "url": "https://www.gov.il/he/pages/seminars-and-conferences",
+    "secondary": "מהנדסי מזון, סטודנטים, מנהלי מפעלים"
+  },
+  {
+    "id": 51,
+    "audience": "גורמי מקצוע ורגולציה",
+    "domain": "בקרה ופיקוח",
+    "title": "נתוני פיקוח ואכיפה של שירות המזון הארצי",
+    "type": "מאגר נתונים",
+    "desc": "לוחות בקרה ונתוני פיקוח, ביקורות במפעלים, דגימות מעבדה ופעולות אכיפה מנהלית ומשפטית ברחבי הארץ.",
+    "url": "https://www.gov.il/he/departments/units/food_control_unit/govil-landing-page",
+    "secondary": "חוקרי מדיניות, עיתונאים, הנהלת משרד הבריאות"
+  }
+];
+    let currentItems = [...initialItems];
+    let selectedAudience = "";
+    let viewMode = "cards";
+
+    const audienceColors = {
+      "יבואני מזון ומפיצים": "#0284C7",
+      "יצרני מזון ותעשייה מקומית": "#0D9488",
+      "עוסקים במזון, משווקים וקמעונאים": "#EA580C",
+      "פודטק, מפתחי מוצרים ו-R&D": "#8B5CF6",
+      "הציבור הרחב והצרכנים": "#16A34A",
+      "עמותות וארגוני חלוקת מזון": "#D97706",
+      "גורמי מקצוע ורגולציה": "#475569"
+    };
+
+    function init() {
+      checkSavedApiKey();
+      updatePills();
+      updateDistributionBar();
+      applyFilters();
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById("toast");
+      t.innerText = msg;
+      t.classList.add("show");
+      setTimeout(() => t.classList.remove("show"), 2600);
+    }
+
+    // API Key Management
+    function openApiModal() {
+      document.getElementById("apiModal").classList.add("open");
+      const key = localStorage.getItem("GEMINI_API_KEY") || "";
+      document.getElementById("modalApiKeyInput").value = key;
+    }
+    function closeApiModal() {
+      document.getElementById("apiModal").classList.remove("open");
+    }
+    function saveApiKey() {
+      const key = document.getElementById("modalApiKeyInput").value.trim();
+      if (key) {
+        localStorage.setItem("GEMINI_API_KEY", key);
+        showToast("מפתח ה-API נשמר בהצלחה!");
+      } else {
+        localStorage.removeItem("GEMINI_API_KEY");
+        showToast("מפתח ה-API הוסר");
+      }
+      closeApiModal();
+      checkSavedApiKey();
+    }
+    function checkSavedApiKey() {
+      const key = localStorage.getItem("GEMINI_API_KEY");
+      const statusSpan = document.getElementById("bannerKeyStatus");
+      const btnText = document.getElementById("apiKeyBtnText");
+      if (key) {
+        statusSpan.innerHTML = `<span style="color: #16A34A; font-weight: 700;">מחובר (מפתח פעיל: ${key.substring(0, 7)}...)</span>`;
+        btnText.innerText = "API Key מחובר";
+      } else {
+        statusSpan.innerText = "לא הוגדר מפתח (פועל במצב הדגמה מקומי).";
+        btnText.innerText = "הגדרת API Key";
+      }
+    }
+
+    function setViewMode(mode) {
+      viewMode = mode;
+      document.getElementById("btnCardsView").classList.toggle("active", mode === 'cards');
+      document.getElementById("btnTableView").classList.toggle("active", mode === 'table');
+      document.getElementById("cardsContainer").style.display = mode === 'cards' ? 'grid' : 'none';
+      document.getElementById("tableContainer").style.display = mode === 'table' ? 'block' : 'none';
+    }
+
+    function updatePills() {
+      const counts = {};
+      currentItems.forEach(i => {
+        counts[i.audience] = (counts[i.audience] || 0) + 1;
+      });
+
+      let html = `<button class="pill ${selectedAudience === '' ? 'active' : ''}" onclick="filterByAudience('')">הכל (${currentItems.length})</button>`;
+      for (const [aud, count] of Object.entries(counts)) {
+        const isActive = selectedAudience === aud ? 'active' : '';
+        html += `<button class="pill ${isActive}" onclick="filterByAudience('${aud}')">${aud} (${count})</button>`;
+      }
+      document.getElementById("audiencePills").innerHTML = html;
+    }
+
+    function filterByAudience(aud) {
+      selectedAudience = aud;
+      updatePills();
+      applyFilters();
+    }
+
+    function applyFilters() {
+      const query = document.getElementById("searchInput").value.trim().toLowerCase();
+      const typeVal = document.getElementById("typeFilter").value;
+      const sortVal = document.getElementById("sortSelect").value;
+
+      let filtered = currentItems.filter(item => {
+        const matchAud = !selectedAudience || item.audience === selectedAudience;
+        const matchType = !typeVal || item.type === typeVal;
+        const matchQuery = !query || 
+          item.title.toLowerCase().includes(query) ||
+          item.desc.toLowerCase().includes(query) ||
+          item.domain.toLowerCase().includes(query) ||
+          item.audience.toLowerCase().includes(query) ||
+          (item.secondary && item.secondary.toLowerCase().includes(query));
+
+        return matchAud && matchType && matchQuery;
+      });
+
+      if (sortVal === "title-asc") {
+        filtered.sort((a,b) => a.title.localeCompare(b.title, 'he'));
+      } else if (sortVal === "audience-asc") {
+        filtered.sort((a,b) => a.audience.localeCompare(b.audience, 'he'));
+      } else if (sortVal === "type-asc") {
+        filtered.sort((a,b) => a.type.localeCompare(b.type, 'he'));
+      } else {
+        filtered.sort((a,b) => a.id - b.id);
+      }
+
+      renderResults(filtered);
+    }
+
+    function resetFilters() {
+      document.getElementById("searchInput").value = "";
+      document.getElementById("typeFilter").value = "";
+      document.getElementById("sortSelect").value = "id-asc";
+      selectedAudience = "";
+      updatePills();
+      applyFilters();
+    }
+
+    function renderResults(items) {
+      document.getElementById("resultsCount").innerText = `מציג ${items.length} מתוך ${currentItems.length} פריטים`;
+
+      const cardsHtml = items.map(item => `
+        <div class="card-item">
+          <div>
+            <div class="card-top">
+              <span class="tag-audience" style="color: ${audienceColors[item.audience] || '#1F4E79'}; border: 1px solid ${audienceColors[item.audience] || '#1F4E79'}40; background-color: ${audienceColors[item.audience] || '#1F4E79'}15;">
+                ${item.audience}
+              </span>
+              <span class="tag-type">${item.type}</span>
+            </div>
+            <h3 class="card-title">${item.title}</h3>
+            <div class="card-domain">${item.domain}</div>
+            <p class="card-desc">${item.desc}</p>
+          </div>
+          <div class="card-footer">
+            <span style="font-size: 0.76rem; color: #64748B;">${item.secondary ? 'משני: ' + item.secondary : ''}</span>
+            <a href="${item.url}" target="_blank" rel="noopener" class="card-link">
+              מעבר לעמוד ←
+            </a>
+          </div>
+        </div>
+      `).join("");
+      document.getElementById("cardsContainer").innerHTML = cardsHtml;
+
+      const tableHtml = items.map(item => `
+        <tr>
+          <td><strong style="color: ${audienceColors[item.audience] || '#1F4E79'}">${item.audience}</strong></td>
+          <td>${item.domain}</td>
+          <td><strong>${item.title}</strong></td>
+          <td><span class="tag-type">${item.type}</span></td>
+          <td style="max-width: 360px;">${item.desc}</td>
+          <td style="text-align: center;">
+            <a href="${item.url}" target="_blank" rel="noopener" class="card-link">פתח דף</a>
+          </td>
+          <td style="font-size: 0.8rem; color: #64748B;">${item.secondary || '-'}</td>
+        </tr>
+      `).join("");
+      document.getElementById("tableBody").innerHTML = tableHtml;
+    }
+
+    function updateDistributionBar() {
+      const counts = {};
+      currentItems.forEach(i => {
+        counts[i.audience] = (counts[i.audience] || 0) + 1;
+      });
+
+      const total = currentItems.length || 1;
+      let barHtml = "";
+      let legendHtml = "";
+
+      for (const [aud, count] of Object.entries(counts)) {
+        const pct = ((count / total) * 100).toFixed(1);
+        const col = audienceColors[aud] || "#64748B";
+
+        barHtml += `<div class="progress-segment" style="width: ${pct}%; background-color: ${col};" title="${aud}: ${count} (${pct}%)"></div>`;
+        legendHtml += `
+          <div class="legend-item" style="cursor: pointer;" onclick="filterByAudience('${aud}')">
+            <div class="legend-color" style="background-color: ${col};"></div>
+            <span><strong>${aud}</strong> (${count} - ${pct}%)</span>
+          </div>
+        `;
+      }
+
+      document.getElementById("distributionBar").innerHTML = barHtml;
+      document.getElementById("distributionLegend").innerHTML = legendHtml;
+
+      document.getElementById("statTotal").innerText = currentItems.length;
+      document.getElementById("statImporters").innerText = counts["יבואני מזון ומפיצים"] || 0;
+      document.getElementById("statManufacturers").innerText = counts["יצרני מזון ותעשייה מקומית"] || 0;
+      document.getElementById("statRetailers").innerText = counts["עוסקים במזון, משווקים וקמעונאים"] || 0;
+      document.getElementById("statFoodtech").innerText = counts["פודטק, מפתחי מוצרים ו-R&D"] || 0;
+      document.getElementById("statPublic").innerText = counts["הציבור הרחב והצרכנים"] || 0;
+      document.getElementById("statProfs").innerText = counts["גורמי מקצוע ורגולציה"] || 0;
+    }
+
+    function exportToExcel() {
+      let csvContent = "\uFEFFקהל יעד ראשי,תחום / נושא,שם הדף / השירות,סוג פריט,תיאור תמציתי ומטרה,קישור ישיר,קהלי יעד משניים\n";
+      currentItems.forEach(item => {
+        const escape = str => `"${(str || '').replace(/"/g, '""')}"`;
+        csvContent += [escape(item.audience), escape(item.domain), escape(item.title), escape(item.type), escape(item.desc), escape(item.url), escape(item.secondary)].join(",") + "\n";
+      });
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `portal_mapping_${new Date().toISOString().slice(0,10)}.csv`;
+      link.click();
+      showToast("קובץ ה-Excel יוצא בהצלחה!");
+    }
+
+    function exportToJSON() {
+      const link = document.createElement("a");
+      link.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(currentItems, null, 2));
+      link.download = `portal_mapping_${new Date().toISOString().slice(0,10)}.json`;
+      link.click();
+      showToast("קובץ JSON יוצא בהצלחה!");
+    }
+
+    function applyPreset() {
+      const preset = document.getElementById("portalPreset").value;
+      const urlInput = document.getElementById("portalUrl");
+      if (preset === "food") {
+        urlInput.value = "https://www.gov.il/he/departments/units/food_control_unit/govil-landing-page";
+        currentItems = [...initialItems];
+        updatePills();
+        updateDistributionBar();
+        applyFilters();
+      } else if (preset === "health") {
+        urlInput.value = "https://www.gov.il/he/departments/ministry_of_health/govil-landing-page";
+      } else if (preset === "economy") {
+        urlInput.value = "https://www.gov.il/he/departments/ministry_of_economy/govil-landing-page";
+      } else if (preset === "tax") {
+        urlInput.value = "https://www.gov.il/he/departments/israel_tax_authority/govil-landing-page";
+      } else {
+        urlInput.value = "";
+        urlInput.focus();
+      }
+    }
+
+    // Real API Call or Simulation
+    async function runMappingEngine() {
+      const url = document.getElementById("portalUrl").value.trim();
+      const apiKey = localStorage.getItem("GEMINI_API_KEY");
+      const model = document.getElementById("modelChoice").value;
+
+      if (!url) {
+        alert("נא להזין כתובת URL למיפוי");
+        return;
+      }
+
+      const pBar = document.getElementById("progressBar");
+      const pFill = document.getElementById("progressFill");
+      const sText = document.getElementById("statusText");
+
+      pBar.style.display = "block";
+      sText.style.display = "block";
+      pFill.style.width = "20%";
+
+      if (!apiKey) {
+        // Fallback simulation mode if no API key set
+        sText.innerText = "פועל במצב הדגמה (לסריקת AI חיה - הגדר API Key מ-Google AI Studio)...";
+        let pct = 20;
+        const interval = setInterval(() => {
+          pct += 25;
+          pFill.style.width = pct + "%";
+          if (pct >= 100) {
+            clearInterval(interval);
+            setTimeout(() => {
+              pBar.style.display = "none";
+              sText.style.display = "none";
+              showToast("המיפוי הושלם (מצב הדגמה). לחבר AI חי לחץ על 'הגדרת API Key'.");
+            }, 400);
+          }
+        }, 350);
+        return;
+      }
+
+      // Real Gemini API Call via Google AI Studio
+      try {
+        sText.innerText = "מתחבר ל-Gemini API ב-Google AI Studio וסורק תוכן חי...";
+        pFill.style.width = "40%";
+
+        const promptText = `סרוק את כתובת האתר הבאה: ${url}.
+חלץ את כל השירותים, המדריכים והדפים המרכזיים שמופיעים באתר.
+עבור כל פריט סווג:
+- audience (קהל יעד ראשי: יבואנים, יצרנים, משווקים, פודטק/מו"פ, צרכנים, עמותות, גורמי מקצוע)
+- domain (נושא / תחום)
+- title (שם הפריט / השירות)
+- type (שירות מקוון, מדריך מקצועי, דף מידע ורגולציה, מאגר נתונים, הודעות וחירום)
+- desc (תקציר ומטרה)
+- url (קישור מלא לעמוד באתר)
+- secondary (קהלי יעד משניים)
+
+החזר JSON בלבד במבנה של מערך אובייקטים items.`;
+
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
+        const requestBody = {
+          contents: [{ parts: [{ text: promptText }] }],
+          generationConfig: {
+            responseMimeType: "application/json"
+          }
+        };
+
+        pFill.style.width = "65%";
+        sText.innerText = "מעבד נתונים ומסווג לפי קהלי יעד ב-Gemini...";
+
+        const response = await fetch(apiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(requestBody)
+        });
+
+        if (!response.ok) {
+          const errData = await response.json();
+          throw new Error(errData.error?.message || "שגיאה בפנייה ל-API");
+        }
+
+        const data = await response.json();
+        pFill.style.width = "90%";
+        sText.innerText = "מרענן תוצאות בדשבורד...";
+
+        const textOutput = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (textOutput) {
+          const parsed = JSON.parse(textOutput);
+          const newItems = Array.isArray(parsed) ? parsed : (parsed.items || []);
+          if (newItems.length > 0) {
+            currentItems = newItems.map((item, i) => ({
+              id: i + 1,
+              audience: item.audience || "כללי",
+              domain: item.domain || "מידע כללי",
+              title: item.title || "ללא כותרת",
+              type: item.type || "דף מידע",
+              desc: item.desc || "",
+              url: item.url || url,
+              secondary: item.secondary || ""
+            }));
+            showToast(`סריקת AI הצליחה! נטענו ${currentItems.length} פריטים חדשים מ-${url}`);
+          } else {
+            showToast("הסריקה הושלמה אך לא אותרו פריטים מתאימים.");
+          }
+        }
+
+        pFill.style.width = "100%";
+        setTimeout(() => {
+          pBar.style.display = "none";
+          sText.style.display = "none";
+          updatePills();
+          updateDistributionBar();
+          applyFilters();
+        }, 400);
+
+      } catch (err) {
+        console.error(err);
+        pBar.style.display = "none";
+        sText.style.display = "none";
+        alert(`שגיאה בהפעלת Gemini API: ${err.message}`);
+      }
+    }
+
+    window.addEventListener("DOMContentLoaded", init);
+  </script>
+</body>
+</html>
